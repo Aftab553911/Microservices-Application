@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ./api-gateway/ApiGateway
+    ports:
+      - "5000:8080"
+    depends_on:
+      - order-service
+      - payment-service
+      - notification-service
+
+  auth-service:
+   container_name: auth-service
+   build:
+     context: ./auth-service/AuthService
+   ports:
+     - "7000:8080"
+   depends_on:
+    - auth-db
+
+  notification-service:
+   container_name: notification-service
+   build:
+     context: ./notification-service/NotificationService
+   depends_on:
+    - kafka
+    - notification-db
+  notification-db:
+   image: postgres:16
+   container_name: notification-db
+   environment:
+     POSTGRES_DB: notification_db
+     POSTGRES_USER: notification_user
+     POSTGRES_PASSWORD: notification_pass
+   ports:
+     - "5435:5432"
+   volumes:
+    - notification-db-data:/var/lib/postgresql/data
+  
+
+  payment-service:
+    container_name: payment-service
+    restart: always
+    build:
+      context: ./payment-service/PaymentService  
+    depends_on:
+      - kafka
+
+  payment-db:
+   image: postgres:16
+   container_name: payment-db
+   environment:
+     POSTGRES_DB: payment_db
+     POSTGRES_USER: payment_user
+     POSTGRES_PASSWORD: payment_pass
+   ports:
+     - "5434:5432"
+   volumes:
+     - payment-db-data:/var/lib/postgresql/data
+
+  order-service:
+    container_name: order-service
+    build:
+      context: ./order-service/OrderService
+    # ports:
+    #   - "8081:8080"
+    depends_on:
+      - kafka
+      - order-db
+  auth-db:
+   image: postgres:16
+   container_name: auth-db
+   environment:
+     POSTGRES_DB: auth_db
+     POSTGRES_USER: auth_user
+     POSTGRES_PASSWORD: auth_pass
+   ports:
+     - "5436:5432"
+   volumes:
+     - auth-db-data:/var/lib/postgresql/data
+  order-db:
+    image: postgres:16
+    container_name: order-db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+volumes:
+  order-db-data:
+  payment-db-data:
+  notification-db-data:
+  auth-db-data:
+
