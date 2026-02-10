@@ -3,10 +3,12 @@ using OrderService.Data;
 using OrderService.Kafka.Events;
 using OrderService.Kafka.Producers;
 using OrderService.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OrderService.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Customer,Admin")]
 [Route("orders")]
 public class OrdersController : ControllerBase
 {

@@ -1,11 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 using Yarp.ReverseProxy;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("jwt-policy", context =>
+    {
+        var userId =
+            context.User?.Identity?.IsAuthenticated == true
+                ? context.User.Identity.Name
+                : context.Connection.RemoteIpAddress?.ToString();
 
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: userId ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,          // 10 requests
+                Window = TimeSpan.FromSeconds(30),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 2
+            });
+    });
+});
 // 🔐 JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -46,10 +67,10 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseRateLimiter();
 app.MapReverseProxy()
-   .RequireAuthorization(); // 🔒 Protect all routes
-
+   .RequireRateLimiting("jwt-policy")
+   .RequireAuthorization();
 app.MapGet("/health", () => "Gateway Healthy");
 
 app.Run();

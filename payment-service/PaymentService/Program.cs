@@ -1,7 +1,10 @@
 using PaymentService.Kafka.Consumers;
 using PaymentService.Kafka.Producers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using PaymentService.Data;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);

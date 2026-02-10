@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+
   api-gateway:
     container_name: api-gateway
     build:
@@ -38,7 +39,7 @@ services:
    ports:
      - "5435:5432"
    volumes:
-    - notification-db-data:/var/lib/postgresql/data
+    - food-delivery-platform_notification-db-data:/var/lib/postgresql/data
   
 
   payment-service:
@@ -59,7 +60,7 @@ services:
    ports:
      - "5434:5432"
    volumes:
-     - payment-db-data:/var/lib/postgresql/data
+     - food-delivery-platform_payment-db-data:/var/lib/postgresql/data
 
   order-service:
     container_name: order-service
@@ -80,7 +81,7 @@ services:
    ports:
      - "5436:5432"
    volumes:
-     - auth-db-data:/var/lib/postgresql/data
+     - food-delivery-platform_auth-db-data:/var/lib/postgresql/data
   order-db:
     image: postgres:16
     container_name: order-db
@@ -91,7 +92,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - order-db-data:/var/lib/postgresql/data
+      - food-delivery-platform_order-db-data:/var/lib/postgresql/data
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
@@ -108,8 +109,12 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
 volumes:
-  order-db-data:
-  payment-db-data:
-  notification-db-data:
-  auth-db-data:
+  food-delivery-platform_order-db-data:
+   external: true
+  food-delivery-platform_payment-db-data:
+   external: true
+  food-delivery-platform_notification-db-data:
+   external: true
+  food-delivery-platform_auth-db-data:
+     external: true
 
