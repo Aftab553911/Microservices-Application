@@ -9,9 +9,14 @@ public class PaymentDbContext : DbContext
         : base(options) { }
 
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<ProcessedEvent> ProcessedEvents => Set<ProcessedEvent>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ProcessedEvent>()
+        .HasIndex(e => e.EventKey)
+        .IsUnique();
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.HasKey(p => p.Id);

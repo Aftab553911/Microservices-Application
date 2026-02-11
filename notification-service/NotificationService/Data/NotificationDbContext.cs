@@ -9,6 +9,7 @@ public class NotificationDbContext : DbContext
         : base(options) { }
 
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<ProcessedEvent> ProcessedEvents => Set<ProcessedEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
