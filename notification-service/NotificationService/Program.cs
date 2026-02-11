@@ -3,7 +3,10 @@ using NotificationService.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using NotificationService.Kafka.Producers;
 using NotificationService.Kafka.Consumers;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +33,8 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-
+builder.Services.AddSingleton<NotificationProducer>();
+builder.Services.AddMemoryCache();
 builder.Services.AddHostedService<PaymentResultConsumer>();
 
 var app = builder.Build();

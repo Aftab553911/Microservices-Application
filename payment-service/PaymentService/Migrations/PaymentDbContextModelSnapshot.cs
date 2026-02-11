@@ -45,6 +45,27 @@ namespace PaymentService.Migrations
 
                     b.ToTable("Payments");
                 });
+
+            modelBuilder.Entity("PaymentService.Models.ProcessedEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventKey")
+                        .IsUnique();
+
+                    b.ToTable("ProcessedEvents");
+                });
 #pragma warning restore 612, 618
         }
     }
