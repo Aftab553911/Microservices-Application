@@ -40,7 +40,13 @@ public class PaymentResultConsumer : BackgroundService
 
         using var consumer = new ConsumerBuilder<string, string>(config).Build();
 
-        consumer.Subscribe(new[] { "payment.completed", "payment.failed" });
+       consumer.Subscribe(new[]
+{
+    "payment.completed",
+    "payment.failed",
+    "order.cancelled"
+});
+
 
         while (!stoppingToken.IsCancellationRequested)
         {  //This is also same concern of result
@@ -49,8 +55,8 @@ public class PaymentResultConsumer : BackgroundService
             var retryCount = 0;
             try
             {
-                result = consumer.Consume(stoppingToken);
-                 eventKey = result.Message.Key;
+                result = consumer.Consume(stoppingToken);          
+                eventKey = result.Message.Key;
 
                 if (string.IsNullOrWhiteSpace(eventKey))
                 {
@@ -86,11 +92,28 @@ public class PaymentResultConsumer : BackgroundService
                     Id = Guid.NewGuid(),
                     OrderId = Guid.Parse(orderId),
                     Type = result.Topic,
-                    Message = $"Notification sent for {result.Topic}",
                     CreatedAt = DateTime.UtcNow
                 };
 
-              
+                // 🔥 HANDLE MESSAGE BASED ON TOPIC
+                if (result.Topic == "payment.completed")
+                {
+                    notification.Message =
+                        $"Payment completed for Order {orderId}";
+                }
+                else if (result.Topic == "payment.failed")
+                {
+                    notification.Message =
+                        $"Payment failed for Order {orderId}";
+                }
+                else if (result.Topic == "order.cancelled")
+                {
+                    notification.Message =
+                        $"Order {orderId} was cancelled due to payment failure";
+                }
+
+
+
 
                 db.Notifications.Add(notification);
                 await db.SaveChangesAsync(stoppingToken);

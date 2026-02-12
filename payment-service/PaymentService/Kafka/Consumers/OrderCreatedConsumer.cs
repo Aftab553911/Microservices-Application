@@ -84,7 +84,8 @@ public class OrderCreatedConsumer : BackgroundService
                 if (order == null)
                     continue;
                 // 1️⃣ Simulate payment
-                var success = Random.Shared.Next(0, 100) > 20;
+                var success = false;
+                //var success = Random.Shared.Next(0, 100) > 20;
 
                 var payment = new Payment
                 {
