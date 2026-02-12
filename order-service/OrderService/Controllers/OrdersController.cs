@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OrderService.Data;
 using OrderService.Kafka.Events;
 using OrderService.Kafka.Producers;
 using OrderService.Models;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Threading.Tasks;
 
 namespace OrderService.Controllers;
 
@@ -24,16 +26,17 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateOrder()
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
     {
         // 1️⃣ Create Order entity
         var order = new Order
         {
             Id = Guid.NewGuid(),
-            TotalAmount = 2500,
+            TotalAmount = request.TotalAmount,
             Status = "Created",
             CreatedAt = DateTime.UtcNow
         };
+
 
         // 2️⃣ Save to DB
         _dbContext.Orders.Add(order);
