@@ -313,3 +313,126 @@ They react to events.
 Events represent facts.
 State changes drive the system.
 Reliability is designed — not assumed.
+
+
+
+
+▶️ Running the Project
+📋 Prerequisites
+
+Make sure the following are installed:
+
+Docker Desktop (latest)
+
+.NET 8 SDK
+
+EF Core CLI
+
+dotnet tool install --global dotnet-ef
+
+🚀 First-Time Setup (Clean Environment)
+
+This should be used when running the project for the first time.
+
+1️⃣ Clone Repository
+git clone <repository-url>
+cd Microservices-Application
+
+2️⃣ Build and Start All Containers
+docker-compose up --build
+
+
+This will start:
+
+Kafka
+
+Zookeeper
+
+PostgreSQL (4 instances)
+
+API Gateway
+
+Auth Service
+
+Order Service
+
+Payment Service
+
+Notification Service
+
+3️⃣ Run Database Migrations
+
+Open separate terminals for each service and run:
+
+Auth Service
+cd auth-service/AuthService
+dotnet ef database update
+
+Order Service
+cd order-service/OrderService
+dotnet ef database update
+
+Payment Service
+cd payment-service/PaymentService
+dotnet ef database update
+
+Notification Service
+cd notification-service/NotificationService
+dotnet ef database update
+
+4️⃣ Verify Kafka Topics (Optional)
+
+Kafka topics are auto-created when first event is published.
+
+You can verify inside Kafka container:
+
+docker exec -it <kafka-container-name> bash
+
+kafka-topics --bootstrap-server localhost:9092 --list
+
+5️⃣ Test the System
+
+Register User
+
+Login → Get access token
+
+Call:
+
+POST http://localhost:5000/orders
+
+
+Observe logs and DB entries.
+
+🔁 Running Project Next Time (Normal Restart)
+
+If everything is already set up:
+
+docker-compose up
+
+
+No need to run migrations again unless schema changed.
+
+🔄 Full Reset (Clean Rebuild)
+
+If you want to completely reset everything:
+
+⚠ This will delete all database data.
+
+docker-compose down -v
+docker-compose up --build
+
+
+Then re-run migrations.
+
+🛑 Stop All Services
+docker-compose down
+
+🧹 Clean Docker System (Advanced)
+
+If volumes or containers become inconsistent:
+
+docker system prune -a
+docker volume prune
+
+
+⚠ Use carefully.
